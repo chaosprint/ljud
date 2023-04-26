@@ -25,16 +25,16 @@ authors = ["Qichao Lan <chaosprint@gmail.com>"]
 # harness = false
 
 
-# [dev-dependencies]
-# cpal = "0.15.2"
-# criterion = "0.4.0"
-# anyhow = "1.0.70"
+[dev-dependencies]
+cpal = "0.15.2"
+criterion = "0.4.0"
+anyhow = "1.0.70"
 
-# [dependencies]
-# smallvec = { version = "1.10.0" }
-# hashbrown = { version = "0.13.2" }
-# libm = { version = "0.2.5", optional = true }
+[dependencies]
+smallvec = { version = "1.10.0" }
+hashbrown = { version = "0.13.2" }
+libm = { version = "0.2.5", optional = true }
 
-# [features]
-# default = []
-# no_std = ["libm"]
+[features]
+default = []
+no_std = ["libm"]
