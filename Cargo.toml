@@ -1,0 +1,40 @@
+[package]
+name = "ljud"
+version = "0.0.0-alpha.0"
+edition = "2021"
+keywords = [
+	"audio",
+    "music",
+	"DSP",
+	"synth",
+    "synthesizer"
+]
+readme = "README.md"
+license-file = "LICENSE"
+description = "Music DSP library written in Rust with a focus on performance and flexibility."
+repository = "https://github.com/chaosprint/lyd.git"
+authors = ["Qichao Lan <chaosprint@gmail.com>"]
+
+# [[bench]]
+# name = "sine"
+# harness = false
+
+
+# [[bench]]
+# name = "fm"
+# harness = false
+
+
+# [dev-dependencies]
+# cpal = "0.15.2"
+# criterion = "0.4.0"
+# anyhow = "1.0.70"
+
+# [dependencies]
+# smallvec = { version = "1.10.0" }
+# hashbrown = { version = "0.13.2" }
+# libm = { version = "0.2.5", optional = true }
+
+# [features]
+# default = []
+# no_std = ["libm"]
