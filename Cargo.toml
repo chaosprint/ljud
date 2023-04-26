@@ -15,14 +15,10 @@ description = "Music DSP library written in Rust with a focus on performance and
 repository = "https://github.com/chaosprint/lyd.git"
 authors = ["Qichao Lan <chaosprint@gmail.com>"]
 
-# [[bench]]
-# name = "sine"
-# harness = false
 
-
-# [[bench]]
-# name = "fm"
-# harness = false
+[[bench]]
+name = "fm"
+harness = false
 
 
 [dev-dependencies]
