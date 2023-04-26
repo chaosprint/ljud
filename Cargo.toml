@@ -1,6 +1,6 @@
 [package]
 name = "ljud"
-version = "0.0.1"
+version = "0.0.1-alpha.1"
 edition = "2021"
 keywords = [
 	"audio",
@@ -12,9 +12,8 @@ keywords = [
 readme = "README.md"
 license-file = "LICENSE"
 description = "Music DSP library written in Rust with a focus on performance and flexibility."
-repository = "https://github.com/chaosprint/lyd.git"
+repository = "https://github.com/chaosprint/ljud.git"
 authors = ["Qichao Lan <chaosprint@gmail.com>"]
-
 
 [[bench]]
 name = "fm"
