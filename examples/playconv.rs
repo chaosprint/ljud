@@ -45,8 +45,8 @@ where
     let sample_rate = config.sample_rate.0;
     let channels = config.channels as usize;
 
-    let elevation = "30"; // see the `full` folder
-    let azimuth = "114"; // see the `full` folder
+    let elevation = "-20"; // see the `full` folder
+    let azimuth = "090"; // see the `full` folder
 
     let mut ctx = Context::new()
         .channels(channels as u8)
@@ -58,8 +58,8 @@ where
                 audio_player("dun_dun_dun.wav").looping(false).boxed(),
                 // convolution("full/elev-10/R-10e355a.wav").boxed(),
                 convolution([
-                    &format!("full/elev{elevation}/L{elevation}e{azimuth}a.wav"),
-                    &format!("full/elev{elevation}/L{elevation}e{azimuth}a.wav")
+                    &format!("assets/mit-hrtf/full/elev{elevation}/L{elevation}e{azimuth}a.wav"),
+                    &format!("assets/mit-hrtf/full/elev{elevation}/L{elevation}e{azimuth}a.wav")
                 ])
                 .boxed()
             ]
