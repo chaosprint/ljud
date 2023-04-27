@@ -13,3 +13,8 @@ pub use sin::*;
 mod player;
 #[cfg(feature = "sampler")]
 pub use player::*;
+
+// #[cfg(feature = "convolution")]
+mod conv;
+// #[cfg(feature = "convolution")]
+pub use conv::*;
