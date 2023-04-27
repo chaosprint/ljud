@@ -51,7 +51,9 @@ where
         .buffer_size(BLOCK_SIZE as u32)
         .set_graph(svec![(
             "output",
-            svec![audio_player("dun_dun_dun.wav").looping(false).boxed()]
+            svec![audio_player("assets/sounds/dun_dun_dun.wav")
+                .looping(false)
+                .boxed()]
         )]);
 
     let err_fn = |err| eprintln!("an error occurred on stream: {}", err);
