@@ -5,7 +5,11 @@ pub trait Node: Send {
 }
 
 mod add;
-mod sin;
-
 pub use add::*;
+mod sin;
 pub use sin::*;
+
+#[cfg(feature = "sampler")]
+mod player;
+#[cfg(feature = "sampler")]
+pub use player::*;
