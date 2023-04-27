@@ -49,7 +49,10 @@ where
         .channels(channels as u8)
         .sample_rate(sample_rate)
         .buffer_size(BLOCK_SIZE as u32)
-        .set_graph(svec![("output", svec![audio_player("dun_dun_dun.wav")])]);
+        .set_graph(svec![(
+            "output",
+            svec![audio_player("dun_dun_dun.wav").looping(false).boxed()]
+        )]);
 
     let err_fn = |err| eprintln!("an error occurred on stream: {}", err);
 
@@ -74,7 +77,7 @@ where
     )?;
     stream.play()?;
 
-    std::thread::sleep(std::time::Duration::from_millis(3000));
+    std::thread::sleep(std::time::Duration::from_millis(30000));
 
     Ok(())
 }

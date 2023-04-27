@@ -1,10 +1,10 @@
 use crate::node::Node;
 use crate::{svec, Buffer, Context};
-use gnuplot::*;
-use hound::{WavReader, WavSamples};
+// use gnuplot::*;
+use hound::WavReader;
 use smallvec::SmallVec;
-use std::fs::File;
-use std::io::{BufReader, Read};
+// use std::fs::File;
+// use std::io::{BufReader, Read};
 use std::path::Path;
 
 pub struct AudioPlayer {
@@ -47,25 +47,54 @@ impl AudioPlayer {
             looping: false,
         }
     }
+    pub fn looping(mut self, looping: bool) -> Self {
+        self.looping = looping;
+        self
+    }
+    pub fn boxed(self) -> Box<dyn Node + Send> {
+        Box::new(self)
+    }
 }
 
 impl Node for AudioPlayer {
     fn process(&mut self, buffer: &mut Buffer, _context: &mut Context) {
         for (channel, buffer_channel) in self.data.iter().zip(buffer.iter_mut()) {
-            for (sample, buffer_sample) in channel[self.position..]
-                .iter()
-                .zip(buffer_channel.iter_mut())
-            {
-                *buffer_sample = *sample;
+            for (sample_idx, buffer_sample) in buffer_channel.iter_mut().enumerate() {
+                let position = self.position + sample_idx;
+                if self.looping {
+                    *buffer_sample = channel[position % channel.len()];
+                } else {
+                    if position < channel.len() {
+                        *buffer_sample = channel[position];
+                    } else {
+                        *buffer_sample = 0.0;
+                    }
+                }
             }
         }
         self.position += buffer[0].len();
-        if self.position >= self.data[0].len() {
-            self.position = 0;
+        if self.looping && self.position >= self.data[0].len() {
+            self.position %= self.data[0].len();
         }
     }
+
+    // fn process(&mut self, buffer: &mut Buffer, _context: &mut Context) {
+    // for (channel, buffer_channel) in self.data.iter().zip(buffer.iter_mut()) {
+    //     for (sample, buffer_sample) in channel[self.position..]
+    //         .iter()
+    //         .zip(buffer_channel.iter_mut())
+    //     {
+    //         *buffer_sample = *sample;
+    //     }
+    // }
+    // self.position += buffer[0].len();
+    // if self.position >= self.data[0].len() {
+    //     self.position = 0;
+    // }
+
+    // }
 }
 
-pub fn audio_player<P: AsRef<Path>>(path: P) -> Box<dyn Node + Send> {
-    Box::new(AudioPlayer::new(path))
+pub fn audio_player<P: AsRef<Path>>(path: P) -> AudioPlayer {
+    AudioPlayer::new(path)
 }
