@@ -9,6 +9,7 @@ pub struct Convolution {
     kernel_right: ArrayVec<f32, 512>,
     all_left_convoluted: SmallVec<[SmallVec<[f32; 1024]>; 8]>,
     all_right_convoluted: SmallVec<[SmallVec<[f32; 1024]>; 8]>,
+    to_remove: SmallVec<[usize; 8]>,
 }
 
 impl Convolution {
@@ -40,6 +41,7 @@ impl Convolution {
             kernel_right,
             all_left_convoluted: svec![],
             all_right_convoluted: svec![],
+            to_remove: svec![],
         }
     }
 
@@ -56,7 +58,6 @@ impl Node for Convolution {
         let right_convoluted = convolve(&buffer[1], &self.kernel_right);
         self.all_left_convoluted.push(left_convoluted);
         self.all_right_convoluted.push(right_convoluted);
-        let mut to_remove = vec![];
 
         for n in 0..buffer_len {
             buffer[0][n] = 0.0;
@@ -64,18 +65,18 @@ impl Node for Convolution {
 
             for (i, convoluted) in self.all_left_convoluted.iter_mut().enumerate() {
                 if convoluted.is_empty() {
-                    to_remove.push(i);
+                    self.to_remove.push(i);
                     continue;
                 } else {
                     buffer[0][n] += convoluted.remove(0);
                     buffer[1][n] += self.all_right_convoluted[i].remove(0);
                 }
             }
-            for i in to_remove.iter().rev() {
+            for i in self.to_remove.iter().rev() {
                 self.all_left_convoluted.remove(*i);
                 self.all_right_convoluted.remove(*i);
             }
-            to_remove.clear();
+            self.to_remove.clear();
         }
     }
 }
