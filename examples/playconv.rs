@@ -6,6 +6,12 @@ use cpal::{
 
 use ljud::*;
 
+// see the `full` folder for the params
+const ELEVATION: &str = "-20";
+const AZIMUTH: &str = "270";
+// const AZIMUTH: &str = "090";
+// const AZIMUTH: &str = "000";
+
 fn main() -> anyhow::Result<()> {
     let host = cpal::default_host();
 
@@ -44,10 +50,7 @@ where
 {
     let sample_rate = config.sample_rate.0;
     let channels = config.channels as usize;
-
-    let elevation = "-20"; // see the `full` folder
-    let azimuth = "090"; // see the `full` folder
-
+    // let azimuth = "270"; // see the `full` folder
     let mut ctx = Context::new()
         .channels(channels as u8)
         .sample_rate(sample_rate)
@@ -60,8 +63,8 @@ where
                     .boxed(),
                 // convolution("full/elev-10/R-10e355a.wav").boxed(),
                 convolution([
-                    &format!("assets/mit-hrtf/full/elev{elevation}/L{elevation}e{azimuth}a.wav"),
-                    &format!("assets/mit-hrtf/full/elev{elevation}/L{elevation}e{azimuth}a.wav")
+                    &format!("assets/mit-hrtf/full/elev{ELEVATION}/L{ELEVATION}e{AZIMUTH}a.wav"),
+                    &format!("assets/mit-hrtf/full/elev{ELEVATION}/R{ELEVATION}e{AZIMUTH}a.wav")
                 ])
                 .boxed()
             ]

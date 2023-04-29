@@ -12,7 +12,7 @@ fn conv(c: &mut Criterion) {
         .set_graph(svec![(
             "output",
             svec![
-                audio_player("dun_dun_dun.wav")
+                audio_player("assets/sounds/dun_dun_dun.wav")
                     .looping(black_box(false))
                     .boxed(),
                 convolution([

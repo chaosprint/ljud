@@ -1,18 +1,22 @@
 use crate::node::Node;
-use crate::{svec, Buffer, Context, SmallVec};
+use crate::{convolve, svec, Buffer, Context, SmallVec};
+use arrayvec::ArrayVec;
 use hound::WavReader;
 use std::path::Path;
-use std::vec::Vec;
 
 pub struct Convolution {
-    kernels: [SmallVec<[f32; 131072]>; 2],
-    position: usize,
-    internal_storage: [Vec<Vec<f32>>; 2],
+    kernel_left: ArrayVec<f32, 512>,
+    kernel_right: ArrayVec<f32, 512>,
+    all_left_convoluted: SmallVec<[SmallVec<[f32; 1024]>; 8]>,
+    all_right_convoluted: SmallVec<[SmallVec<[f32; 1024]>; 8]>,
 }
 
 impl Convolution {
     pub fn new<P: AsRef<Path>>(paths: [P; 2]) -> Self {
-        let mut kernels = [svec![], svec![]];
+        let mut kernel_left: ArrayVec<f32, 512> = ArrayVec::new();
+        let mut kernel_right: ArrayVec<f32, 512> = ArrayVec::new();
+
+        // plot_mono(&kernel_left);
 
         for (i, path) in paths.iter().enumerate() {
             let mut reader = WavReader::open(path).expect("Failed to open WAV file");
@@ -21,20 +25,21 @@ impl Convolution {
 
             for result in reader.samples::<i16>() {
                 let sample = result.unwrap() as f32 / i16::MAX as f32;
-                kernels[i].push(sample);
+                match i {
+                    0 => kernel_left.push(sample),
+                    1 => kernel_right.push(sample),
+                    _ => panic!("We need two kernels!"),
+                }
             }
         }
 
-        let kernel_len = kernels[0].len();
-        let internal_storage = [
-            vec![vec![0.0; kernel_len]; kernel_len],
-            vec![vec![0.0; kernel_len]; kernel_len],
-        ];
-
+        // let kernel_len = kernel_right.len();
+        // println!("Kernel length: {}", kernel_len);
         Self {
-            kernels,
-            position: 0,
-            internal_storage,
+            kernel_left,
+            kernel_right,
+            all_left_convoluted: svec![],
+            all_right_convoluted: svec![],
         }
     }
 
@@ -45,33 +50,33 @@ impl Convolution {
 
 impl Node for Convolution {
     fn process(&mut self, buffer: &mut Buffer, _context: &mut Context) {
-        let kernel_len = self.kernels[0].len();
         let buffer_len = buffer[0].len();
 
-        for (i, buffer_channel) in buffer.iter_mut().enumerate() {
-            for buffer_sample_idx in 0..buffer_len {
-                let input_sample = buffer_channel[buffer_sample_idx];
-                for kernel_idx in 0..kernel_len {
-                    self.internal_storage[i][kernel_idx]
-                        .push(input_sample * self.kernels[i][kernel_idx]);
+        let left_convoluted = convolve(&buffer[0], &self.kernel_left);
+        let right_convoluted = convolve(&buffer[1], &self.kernel_right);
+        self.all_left_convoluted.push(left_convoluted);
+        self.all_right_convoluted.push(right_convoluted);
+        let mut to_remove = vec![];
+
+        for n in 0..buffer_len {
+            buffer[0][n] = 0.0;
+            buffer[1][n] = 0.0;
+
+            for (i, convoluted) in self.all_left_convoluted.iter_mut().enumerate() {
+                if convoluted.is_empty() {
+                    to_remove.push(i);
+                    continue;
+                } else {
+                    buffer[0][n] += convoluted.remove(0);
+                    buffer[1][n] += self.all_right_convoluted[i].remove(0);
                 }
             }
-        }
-
-        for (i, buffer_channel) in buffer.iter_mut().enumerate() {
-            for buffer_sample_idx in 0..buffer_len {
-                let mut sum = 0.0;
-                for kernel_idx in 0..kernel_len {
-                    let position = self.position + buffer_sample_idx + kernel_idx;
-                    if position < self.internal_storage[i][kernel_idx].len() {
-                        sum += self.internal_storage[i][kernel_idx][position];
-                    }
-                }
-                buffer_channel[buffer_sample_idx] = sum;
+            for i in to_remove.iter().rev() {
+                self.all_left_convoluted.remove(*i);
+                self.all_right_convoluted.remove(*i);
             }
+            to_remove.clear();
         }
-
-        self.position += buffer_len;
     }
 }
 

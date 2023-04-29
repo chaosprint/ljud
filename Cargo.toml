@@ -1,6 +1,6 @@
 [package]
 name = "ljud"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2021"
 keywords = [
 	"audio",
@@ -30,13 +30,16 @@ anyhow = "1.0.70"
 
 [dependencies]
 smallvec = { version = "1.10.0" }
+arrayvec = "0.7.2"
 hashbrown = { version = "0.13.2" }
 hound = { version = "3.5.0", optional = true }
 libm = { version = "0.2.5", optional = true }
-gnuplot = "*"
+gnuplot = { version = "0.0.37", optional = true } 
 
 [features]
-default = ["sampler"]
-# convolution = ["hound"]
+# default = []
+default = ["sampler", "convolution"]
 sampler = ["hound"]
+convolution = []
 no_std = ["libm"]
+plot = ["gnuplot"]

@@ -15,6 +15,9 @@ pub use node::*;
 pub mod param;
 pub use param::*;
 
+pub mod utils;
+pub use utils::*;
+
 pub type Signal = SmallVec<[Box<dyn Node + Send>; 8]>; //  SmallVec<[Box<dyn Node + Send>; 8]>;
 pub type Buffer = SmallVec<[SmallVec<[f32; 1024]>; 2]>; // limit to 2 channels
 
