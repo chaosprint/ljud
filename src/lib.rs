@@ -6,8 +6,13 @@ extern crate alloc;
 pub use alloc::boxed::Box;
 
 use hashbrown::HashMap;
+use hound::WavReader;
 pub use smallvec::smallvec as svec;
 use smallvec::{smallvec, SmallVec};
+use std::path::PathBuf;
+use tokio::fs::File;
+use tokio::io::AsyncReadExt;
+use walkdir::{DirEntry, WalkDir};
 
 pub mod node;
 pub use node::*;
@@ -27,6 +32,7 @@ pub struct Context {
     pub buffer_size: u32,
     pub signals: HashMap<&'static str, Signal>,
     pub buffers: HashMap<&'static str, Buffer>,
+    pub ir_lib: HashMap<(u8, i32, u32), Vec<f32>>,
 }
 
 impl Context {
@@ -37,6 +43,7 @@ impl Context {
             buffer_size: 128,
             signals: HashMap::new(),
             buffers: HashMap::new(),
+            ir_lib: HashMap::new(),
         }
     }
     pub fn channels(mut self, channels: u8) -> Self {
@@ -62,6 +69,52 @@ impl Context {
                 name,
                 smallvec![smallvec![0.0; self.buffer_size as usize]; self.channels as usize],
             );
+        }
+        self
+    }
+
+    pub fn init(mut self) -> Self {
+        for entry in WalkDir::new("./assets/mit-hrtf/")
+            .into_iter()
+            .filter_map(Result::ok)
+            .filter(|e| {
+                !e.file_type().is_dir()
+                    && e.path().extension().unwrap_or_default() == "wav"
+                    && !e.path().to_str().unwrap().contains("headphones")
+            })
+        {
+            let mut kernel = vec![];
+            let path = entry.path().to_owned();
+            // let mut file = File::open(&path).await.unwrap();
+            // println!("loading {:?}", path);
+
+            let mut reader = WavReader::open(path).expect("Failed to open WAV file");
+            let spec = reader.spec();
+            assert_eq!(spec.channels, 1, "Convolution kernel must be mono");
+
+            for result in reader.samples::<i16>() {
+                let sample = result.unwrap() as f32 / i16::MAX as f32;
+                kernel.push(sample);
+            }
+            let mut name = entry.file_name().to_str().unwrap().split('e');
+            let channel_and_elevation = name.next().unwrap();
+            let azimuth = name.next().unwrap().split("a").next().unwrap();
+
+            // println!("channel_and_elevation {}", channel_and_elevation);
+            // println!("azimuth {}", azimuth);
+
+            let elevation = channel_and_elevation[1..].parse::<i32>().unwrap();
+
+            let key = match &channel_and_elevation[0..1] {
+                "L" => (0_u8, elevation, azimuth.parse::<u32>().unwrap()),
+                "R" => (1_u8, elevation, azimuth.parse::<u32>().unwrap()),
+                _ => panic!("invalid channel"),
+            };
+            // println!("key {:?}", &key);
+            self.ir_lib.insert(key, kernel);
+
+            // let mut buffer = Vec::new();
+            // file.read_to_end(&mut buffer).await.unwrap();
         }
         self
     }

@@ -11,7 +11,6 @@ const ELEVATION: &str = "-20";
 const AZIMUTH: &str = "270";
 // const AZIMUTH: &str = "090";
 // const AZIMUTH: &str = "000";
-
 fn main() -> anyhow::Result<()> {
     let host = cpal::default_host();
 
@@ -59,17 +58,17 @@ where
             "output",
             svec![
                 audio_player("assets/sounds/dun_dun_dun.wav")
-                    .looping(false)
+                    .looping(true)
                     .boxed(),
-                // convolution("full/elev-10/R-10e355a.wav").boxed(),
-                convolution([
-                    &format!("assets/mit-hrtf/full/elev{ELEVATION}/L{ELEVATION}e{AZIMUTH}a.wav"),
-                    &format!("assets/mit-hrtf/full/elev{ELEVATION}/R{ELEVATION}e{AZIMUTH}a.wav")
-                ])
-                .boxed()
+                convolution(20, 0).boxed(),
+                // convolution([
+                //     &format!("assets/mit-hrtf/full/elev{ELEVATION}/L{ELEVATION}e{AZIMUTH}a.wav"),
+                //     &format!("assets/mit-hrtf/full/elev{ELEVATION}/R{ELEVATION}e{AZIMUTH}a.wav")
+                // ])
+                // .boxed()
             ]
-        )]);
-
+        )])
+        .init();
     let err_fn = |err| eprintln!("an error occurred on stream: {}", err);
 
     let stream = device.build_output_stream(
