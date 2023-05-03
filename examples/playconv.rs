@@ -57,9 +57,8 @@ where
         .set_graph(svec![(
             "output",
             svec![
-                audio_player("assets/sounds/dun_dun_dun.wav")
-                    .looping(true)
-                    .boxed(),
+                audio_player("sin440.wav").looping(true).boxed(),
+                // audio_player("assets/sounds/done.wav").looping(true).boxed(),
                 convolution(20, 0).boxed(),
                 // convolution([
                 //     &format!("assets/mit-hrtf/full/elev{ELEVATION}/L{ELEVATION}e{AZIMUTH}a.wav"),
