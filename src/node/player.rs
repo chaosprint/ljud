@@ -1,12 +1,11 @@
 use crate::node::Node;
 use crate::{svec, Buffer, Context};
-// use gnuplot::*;
 use hound::WavReader;
 use smallvec::SmallVec;
 use std::path::Path;
 
 pub struct AudioPlayer {
-    data: SmallVec<[SmallVec<[f32; 131072]>; 2]>,
+    data: SmallVec<[Vec<f32>; 2]>,
     position: usize,
     looping: bool,
 }
@@ -16,10 +15,10 @@ impl AudioPlayer {
         let mut reader = WavReader::open(path).expect("Failed to open WAV file");
         let spec = reader.spec();
         let num_channels = spec.channels as usize;
-        let mut data: SmallVec<[SmallVec<[f32; 131072]>; 2]> = svec![];
+        let mut data: SmallVec<[Vec<f32>; 2]> = svec![];
 
         for _ in 0..num_channels {
-            data.push(SmallVec::new());
+            data.push(Vec::new());
         }
 
         let mut sample_count = 0;
@@ -29,15 +28,6 @@ impl AudioPlayer {
             data[channel].push(sample);
             sample_count += 1;
         }
-
-        // let mut x = (0..data[0].len()).collect::<Vec<_>>();
-        // let mut fg = Figure::new();
-        // fg.axes2d()
-        //     .set_title("Glicol output", &[])
-        //     .set_legend(Graph(0.5), Graph(0.9), &[], &[])
-        //     .lines(&x, &data[0], &[Caption("left")]);
-        // fg.show().unwrap();
-
         Self {
             data,
             position: 0,
