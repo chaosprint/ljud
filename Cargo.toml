@@ -1,14 +1,8 @@
 [package]
 name = "ljud"
-version = "0.0.4"
+version = "0.0.5"
 edition = "2021"
-keywords = [
-	"audio",
-    "music",
-	"DSP",
-	"synth",
-    "synthesizer"
-]
+keywords = ["audio", "music", "DSP", "synth", "synthesizer"]
 readme = "README.md"
 license-file = "LICENSE"
 description = "Graph-based music DSP library with a focus on flexibility."
@@ -34,7 +28,7 @@ arrayvec = "0.7.2"
 hashbrown = { version = "0.13.2" }
 hound = { version = "3.5.0", optional = true }
 libm = { version = "0.2.5", optional = true }
-gnuplot = { version = "0.0.37" } # , optional = true } 
+gnuplot = { version = "0.0.37" }                    # , optional = true } 
 tokio = { version = "1.28.0", features = ["full"] }
 walkdir = "2.3.3"
 
